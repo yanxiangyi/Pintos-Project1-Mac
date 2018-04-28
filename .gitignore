@@ -6,3 +6,4 @@ tags
 CMakeLists.txt
 cmake-build-debug
 build/
+.vscode/
