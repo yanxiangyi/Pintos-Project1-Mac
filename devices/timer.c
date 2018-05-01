@@ -93,9 +93,9 @@ timer_sleep (int64_t ticks)
     return;
   ASSERT (intr_get_level () == INTR_ON);
 
-  enum intr_level old_level = intr_disable ();
-
+  enum intr_level old_level = intr_get_level ();
   thread_current()->sleep_ticks = ticks;
+  intr_set_level(INTR_OFF);
   thread_block ();
 
   intr_set_level (old_level);
@@ -173,9 +173,7 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
-  enum intr_level old_level = intr_disable ();
   thread_foreach (thread_sleep_remaining, NULL);
-  intr_set_level (old_level);
   thread_tick ();
 }
 
@@ -187,7 +185,7 @@ too_many_loops (unsigned loops)
   /* Wait for a timer tick. */
   int64_t start = ticks;
   while (ticks == start)
-          barrier ();
+    barrier ();
 
   /* Run LOOPS loops. */
   start = ticks;
@@ -208,7 +206,7 @@ static void NO_INLINE
 busy_wait (int64_t loops)
 {
   while (loops-- > 0)
-          barrier ();
+    barrier ();
 }
 
 /* Sleep for approximately NUM/DENOM seconds. */
